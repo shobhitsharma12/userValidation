@@ -1,0 +1,154 @@
+var async = require('asyncawait/async');
+var await = require('asyncawait/await');
+var webdriverio = require('webdriverio');
+
+var options = {
+    desiredCapabilities: {
+        browserName: 'chrome',
+        logLevel: 'verbose'
+    }
+};
+
+function preProcessForm(){
+  document.getElementsByName("seg0_date")[0].removeAttribute('readonly')
+  document.getElementsByName("seg1_date")[0].removeAttribute('readonly')
+}
+function hideCalendar(){
+  document.getElementById("ui-datepicker-div").style.display = 'none'
+}
+
+function getLowestFare(flightName){
+  //console.log("Calculating lowest fare.....");
+  var flights = document.querySelectorAll("#fares-search-package-list .inner-package-list ul")[0];
+  var flightDivs = document.querySelectorAll("#fares-search-package-list .inner-package-list ul")[0].childNodes
+  flightDivs = Array.prototype.slice.call(flightDivs, 0).filter((a)=> (a.nodeName=="LI"))
+  var foundFlights = flightDivs.filter((flightDiv) => {
+    var flightString = flightDiv.textContent.trim().replace(/\s+/g, ' ');
+    return flightString.indexOf(flightName) >= 0
+  })
+  if (foundFlights.length){
+    var foundFare = foundFlights[0].querySelectorAll('.flight-price-number')[0].textContent.trim().replace(/\s+/g, ' ') + ":found"
+    console.log("flight is found :",foundFare)
+  } else {
+    var foundFare = flightDivs[0].querySelectorAll('.flight-price-number')[0].textContent.trim().replace(/\s+/g, ' ') + ":lowest"
+    console.log("Lowest fare is :",foundFare)
+  }
+  return foundFare
+}
+
+var roundTrip = function(source,destination,date1,date2){
+  var b1 = webdriverio.remote(options).init().url("http://www.flighthub.com/")
+  console.log("b1",b1)
+  b1.then(()=>b1.setValue('#main_search_fares_form .container-home-search-from .hp-search-city input.airport_search', source))
+    .then(()=>b1.setValue('#main_search_fares_form .container-home-search-from .hp-search-date input', date1))
+    .then(()=>b1.setValue('#main_search_fares_form .container-home-search-to .hp-search-city input.airport_search', destination))
+    .then(()=>b1.setValue('#main_search_fares_form .container-home-search-to .hp-search-date input', date2))
+    .then(()=>b1.click('#btn-search-flight'))
+    .then(()=>b1.saveScreenshot('./src/scrap/snapshot1.png'))
+    .then(()=>b1.waitForVisible('.filter-button.active',10000))
+    .then(()=>b1.saveScreenshot('./src/scrap/snapshot2.png'))
+    .then(()=>b1.end())
+}
+
+/*
+ * TRIP TYPE = ROUND_TRIP
+ * roundTrip2('YYZ','LHR','2017-04-05','2017-04-12','46')
+ *
+*/ 
+module.exports.roundTrip2 = async (function(source,destination,date1,date2,flightName){
+try {
+  //console.log("Round Trip search .................>")
+  var b1 = webdriverio.remote(options).init().url("http://us.flighthub.com/")
+  await (b1.setValue('#inline-search-form-1 .form-field-from input.airport-related[name^="seg0_from"]', source))
+  await (b1.setValue('#inline-search-form-1 .form-field-to input.airport-related[name^="seg0_to"]', destination)) 
+  await (b1.execute(function(){document.getElementsByName("seg0_date")[0].removeAttribute('readonly')}))
+  await (b1.execute(function(){document.getElementsByName("seg1_date")[0].removeAttribute('readonly')}))
+  await (b1.setValue('#inline-search-form-1 .form-field-from-date input[name^="seg0_date"]', date1))
+  await (b1.setValue('#inline-search-form-1 .form-field-to-date input[name^="seg1_date"]', date2).then((s)=>console.log("success",s),(f)=> console.log("failure",f) ) )
+  //Clicking search button
+  await (b1.click('#inline-search-form-1 .form-field-button'))
+  await (b1.waitForVisible('.lowest-price.active',20000))
+  await (b1.saveScreenshot('./src/scrap/FinalResult.png'))
+  var result = await (b1.execute(getLowestFare,flightName))
+  //await (b1.debug())
+  await (b1.end())
+
+  return result.value
+ }
+ catch(err)
+ {
+  console.log(err);
+  return null;
+ } 
+
+});
+ /*
+ * TRIP TYPE = ONE_WAY
+ * FOR us.flighthub.com
+ *
+ * oneway('YYZ','LHR','2017-03-17','46')
+ */
+module.exports.oneway = async (function(source,destination,date1,flightName){
+try {
+  //console.log("One Way search .......................>")
+  var b1 = webdriverio.remote(options).init().url("http://us.flighthub.com/")
+  await (b1.click('#inline-search-form-1 .form-filters-wrap.flight-type.clearfix ul > li:nth-child(2) > a'))
+  //await (b1.saveScreenshot('./src/scrap/oneWay.png'))
+  await (b1.setValue('#inline-search-form-1 .form-field-from input.airport-related[name^="seg0_from"]', source))
+  await (b1.setValue('#inline-search-form-1 .form-field-to input.airport-related[name^="seg0_to"]', destination)) 
+  await (b1.execute(function(){document.getElementsByName("seg0_date")[0].removeAttribute('readonly')}))
+  await (b1.setValue('#inline-search-form-1 .form-field-from-date input[name^="seg0_date"]', date1))
+  await (b1.click('#inline-search-form-1 .form-field-button'))
+  await (b1.waitForVisible('.lowest-price.active',20000))
+  //await (b1.saveScreenshot('./src/scrap/FinalResult.png'))
+  //console.log('Calculating lowest fare.....');
+  var result = await (b1.execute(getLowestFare,flightName))
+  //console.log("Lowest Price....."+result.value);
+  //await (b1.debug())
+  await (b1.end())
+  return result.value
+ }
+ catch(err)
+ {
+  console.log(err);
+  return null;
+ } 
+
+});
+/*
+ *TRIP TYPE = MULTICITY
+ * for us.flighthub.com
+ *
+ * multicity('YYZ','LHR','2017-04-17','46','LHR','SIN','2017-04-28')
+ */
+module.exports.multicity = async (function(source1,destination1,date1,flightName,source2,destination2,date2){
+try {
+  //console.log("Multicity search ......................>")
+  var b1 = webdriverio.remote(options).init().url("http://us.flighthub.com/")
+  await (b1.click('#inline-search-form-1 .form-filters-wrap.flight-type.clearfix ul > li:nth-child(3) > a'))
+  //City 1 data 
+  await (b1.setValue('#inline-search-form-1 .form-field-from input.airport-related[name^="seg0_from"]', source1))
+  await (b1.setValue('#inline-search-form-1 .form-field-to input.airport-related[name^="seg0_to"]', destination1)) 
+  await (b1.execute(function(){document.getElementsByName("seg0_date")[0].removeAttribute('readonly')}))
+  await (b1.execute(function(){document.getElementsByName("seg1_date")[1].removeAttribute('readonly')}))
+  await (b1.setValue('#inline-search-form-1 .form-field-from-date input[name^="seg0_date"]', date1))
+  //City 2 data
+  await (b1.setValue('#inline-search-form-1 #inline-search-form-segment-1 .form-field-from input.airport-related[name^="seg1_from"]', source2))
+  await (b1.setValue('#inline-search-form-1 #inline-search-form-segment-1 .form-field-to input.airport-related[name^="seg1_to"]', destination2))
+  await (b1.setValue('#inline-search-form-1 #inline-search-form-segment-1 .form-field-from-date input[name^="seg1_date"]', date2))
+  //Starting search process by clicking search button
+  await (b1.click('#inline-search-form-1 .form-field-button'))
+  await (b1.waitForVisible('.lowest-price.active',20000))
+  //await (b1.saveScreenshot('./src/scrap/FinalResult.png'))
+  //console.log('Calculating lowest fare.....');
+  var result = await (b1.execute(getLowestFare,flightName))
+  await (b1.end())
+  return result.value
+ }
+ catch(err)
+ {
+  console.log(err);
+  return null;
+ } 
+
+});

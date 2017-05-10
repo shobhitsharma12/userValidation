@@ -1,0 +1,145 @@
+body { padding-top:50px; }
+#mypopup {
+   z-index:100;
+   border: 2px solid black;
+   display:none;
+   background-color: beige;
+   position:absolute;
+   width:1000px;
+   height: auto;
+}
+#mypopup1 {
+   z-index:200;
+   border: 2px solid black;
+   display:none;
+   background-color: beige;
+   position:absolute;
+   width:800px;
+   height: auto;
+}
+#mypopup2 {
+   z-index:400;
+   border: 2px solid black;
+   display:none;
+   background-color: beige;
+   position:absolute;
+   width:800px;
+   height: auto;
+}
+#myInput {
+    background-image: url('/css/searchicon.png'); /* Add a search icon to input */
+    background-position: 10px 12px; /* Position the search icon */
+    background-repeat: no-repeat; /* Do not repeat the icon image */
+    width: 100%; /* Full-width */
+    font-size: 16px; /* Increase font-size */
+    padding: 12px 20px 12px 40px; /* Add some padding */
+    border: 1px solid #ddd; /* Add a grey border */
+    margin-bottom: 12px; /* Add some space below the input */
+}
+.footer,table {
+  background-color: #f5f5f5;
+}
+.sqlSeachBox1{
+  width:100%; background-color:#b6b5b9; padding:15px;
+}
+.sqlSeachBox2{
+  background-color:#b6b5b9;
+}
+.adminSalesReport1{
+  border-radius:5px; width:11%;
+}
+.adminSalesReport2{
+  max-width:350px;
+}
+.adminSalesReport3{
+  max-width:50%;
+}
+.adminSalesReport4{
+  max-width:30%;
+}
+.adminSalesReport5{
+  width:30%;
+}
+.adminSalesReport6{
+  background-color: #eff0f2;
+  color: #000000;
+}
+.adminSalesReport7{
+  background-color: #e8e8e8;
+  color: #000000;
+}
+@import "bourbon";
+
+body {
+	background: #eee !important;
+}
+
+.wrapper {
+	margin-top: 80px;
+  margin-bottom: 80px;
+}
+
+.form-signin {
+  max-width: 380px;
+  padding: 15px 35px 45px;
+  margin: 0 auto;
+  background-color: #fff;
+  border: 1px solid rgba(0,0,0,0.1);
+
+  .form-signin-heading,
+	.checkbox {
+	  margin-bottom: 30px;
+	}
+
+	.checkbox {
+	  font-weight: normal;
+	}
+
+	.form-control {
+	  position: relative;
+	  font-size: 16px;
+	  height: auto;
+	  padding: 10px;
+		@include box-sizing(border-box);
+
+		&:focus {
+		  z-index: 2;
+		}
+	}
+
+	input[type="text"] {
+	  margin-bottom: -1px;
+	  border-bottom-left-radius: 0;
+	  border-bottom-right-radius: 0;
+	}
+
+	input[type="password"] {
+	  margin-bottom: 20px;
+	  border-top-left-radius: 0;
+	  border-top-right-radius: 0;
+	}
+}
+.loginPage1{
+  float: left;
+}
+.demo1{
+  background-color: #b8b9ba;
+  width: 100%;
+  height: 80px;
+  padding-left: 30px;
+
+}
+.demo2{
+  display: inline-block;
+}
+.demo3{
+  display: inline-block;
+  float: right;
+  padding: 25px;
+  color: white;
+}
+.demo4{
+  background-color: blue;
+  border: 2px solid blue;
+  border-radius: 3px;
+}
